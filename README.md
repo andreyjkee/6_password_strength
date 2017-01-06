@@ -1,7 +1,8 @@
 # Password Strength Calculator
 
-[TODO. There will be project description]
+This script rates your entered password (rate from 1 to 10).
 
-# Project Goals
-
-The code is written for educational purposes. Training course for web-developers - [DEVMAN.org](https://devman.org)
+Usage:
+```
+python password_strength.py
+```
