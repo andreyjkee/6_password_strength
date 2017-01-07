@@ -1,30 +1,40 @@
+import argparse
 import getpass
 import re
+
+global black_list
+
+class PasswordErrorsEnum():
+    OFFENSIVE_WORDS = 'Не используйте запрещенные слова, и личную информацию в пароле'
+    MIXED_CASE = 'Используйте разный регистр букв'
+    DIGITS = 'Пароль не содержит цифр'
+    LENGTH = 'Используйте длинные пароли, не менее 8 символов'
+    SPECIAL_CHARS = 'Используйте специальные символы в пароле'
 
 
 def get_password_strength(password):
     strength = 1
     recomendations = []
-    if any([__has_offensive_words(password), __has_personal_info(password)]):
-        recomendations.append('Не используйте запрещенные слова, и личную информацию в пароле')
-        return strength
+    if __has_offensive_words(password):
+        recomendations.append(PasswordErrorsEnum.OFFENSIVE_WORDS)
+        return strength, recomendations
     strength = 0
     if __is_case_sensitive(password):
         strength += 2
     else:
-        recomendations.append('Используйте разный регистр букв')
+        recomendations.append(PasswordErrorsEnum.MIXED_CASE)
     if __has_number(password):
         strength += 1
     else:
-        recomendations.append('Пароль не содержит цифр')
-    if __valid_password_length(password):
+        recomendations.append(PasswordErrorsEnum.DIGITS)
+    if __is_valid_password_length(password):
         strength += 2
     else:
-        recomendations.append('Используйте длинные пароли, не менее 8 символов')
+        recomendations.append(PasswordErrorsEnum.LENGTH)
     if __has_special_chars(password):
         strength += 5
     else:
-        recomendations.append('Используйте специальные символы в пароле')
+        recomendations.append(PasswordErrorsEnum.SPECIAL_CHARS)
     return strength, recomendations
 
 def __is_case_sensitive(password):
@@ -34,25 +44,33 @@ def __has_number(password):
     return bool(re.findall(r'\d', password))
 
 def __has_special_chars(password):
-    patter_str = r'[`\~\!\@\#\$\%\^\&\*\(\)\_\-\+\{\}\[\]\\\|\:\;\"\'\<\>\,\.\?\/]'
+    patter_str = r'[`~!@#$%^&*()_{}[]|\+-:;"<>,.?]'
     return bool(re.findall(patter_str, password))
 
+def __read_list_from_file(filestream):
+    with filestream as f:
+        return [line.rstrip('\n') for line in f.readlines()]
+
 def __has_offensive_words(password):
-    black_list = ['test', 'Password1', '12345', 'password']
+    if not black_list:
+        return False
     pattern = re.compile('(' + '|'.join(black_list) + ')', re.IGNORECASE)
     return bool(pattern.findall(password))
 
-def __has_personal_info(password):
-    info_words = ['realname', 'cat name']
-    pattern = re.compile('(' + '|'.join(info_words) + ')', re.IGNORECASE)
-    return bool(pattern.findall(password))
-
-def __valid_password_length(password, length=8):
+def __is_valid_password_length(password, length=8):
     return len(password) >= length
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Check password strength")
+    parser.add_argument("-b", "--black-list", type=argparse.FileType('r'), dest="blacklist")
+    parser.add_argument("-l", "--length", type=int, default=8, help='minimum password length')
+    options = parser.parse_args()
+    if options.blacklist:
+        black_list = __read_list_from_file(options.blacklist)
     password = getpass.getpass('Enter password:')
+    print(get_password_strength(password))
+    print(PasswordErrorsEnum.OFFENSIVE_WORDS)
     strength, recomendations = get_password_strength(password)
     print('Оценка сложности пароля (макс. 10): {0}'.format(strength))
     if recomendations:
