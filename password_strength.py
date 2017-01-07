@@ -5,36 +5,36 @@ import re
 global black_list
 
 class PasswordErrorsEnum():
-    OFFENSIVE_WORDS = 'Не используйте запрещенные слова, и личную информацию в пароле'
-    MIXED_CASE = 'Используйте разный регистр букв'
-    DIGITS = 'Пароль не содержит цифр'
-    LENGTH = 'Используйте длинные пароли, не менее 8 символов'
-    SPECIAL_CHARS = 'Используйте специальные символы в пароле'
+    offensive_words = 'Не используйте запрещенные слова, и личную информацию в пароле'
+    mixed_case = 'Используйте разный регистр букв'
+    digits = 'Пароль не содержит цифр'
+    length = 'Используйте длинные пароли, не менее 8 символов'
+    special_chars = 'Используйте специальные символы в пароле'
 
 
 def get_password_strength(password):
     strength = 1
     recomendations = []
     if __has_offensive_words(password):
-        recomendations.append(PasswordErrorsEnum.OFFENSIVE_WORDS)
+        recomendations.append(PasswordErrorsEnum.offensive_words)
         return strength, recomendations
     strength = 0
     if __is_case_sensitive(password):
         strength += 2
     else:
-        recomendations.append(PasswordErrorsEnum.MIXED_CASE)
+        recomendations.append(PasswordErrorsEnum.mixed_case)
     if __has_number(password):
         strength += 1
     else:
-        recomendations.append(PasswordErrorsEnum.DIGITS)
+        recomendations.append(PasswordErrorsEnum.digits)
     if __is_valid_password_length(password):
         strength += 2
     else:
-        recomendations.append(PasswordErrorsEnum.LENGTH)
+        recomendations.append(PasswordErrorsEnum.length)
     if __has_special_chars(password):
         strength += 5
     else:
-        recomendations.append(PasswordErrorsEnum.SPECIAL_CHARS)
+        recomendations.append(PasswordErrorsEnum.special_chars)
     return strength, recomendations
 
 def __is_case_sensitive(password):
@@ -69,8 +69,6 @@ if __name__ == '__main__':
     if options.blacklist:
         black_list = __read_list_from_file(options.blacklist)
     password = getpass.getpass('Enter password:')
-    print(get_password_strength(password))
-    print(PasswordErrorsEnum.OFFENSIVE_WORDS)
     strength, recomendations = get_password_strength(password)
     print('Оценка сложности пароля (макс. 10): {0}'.format(strength))
     if recomendations:
