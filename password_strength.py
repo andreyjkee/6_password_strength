@@ -8,12 +8,14 @@ class PasswordErrorsEnum(Enum):
     mixed_case = 1
     digits = 2
     special_chars = 3
+    length = 4
 
 
 password_errors_map = {
     PasswordErrorsEnum.mixed_case: 'Используйте разный регистр букв',
     PasswordErrorsEnum.digits: 'Пароль не содержит цифр',
-    PasswordErrorsEnum.special_chars: 'Используйте специальные символы в пароле'
+    PasswordErrorsEnum.special_chars: 'Используйте специальные символы в пароле',
+    PasswordErrorsEnum.length: 'Пароль сшишком короткий, это упрощает его перебор'
 }
 
 def get_password_strength(password):
@@ -23,12 +25,16 @@ def get_password_strength(password):
         strength += 1
     else:
         recomendations.append(PasswordErrorsEnum.digits)
+    if len(password) >= 8:
+        strength += 2
+    else:
+        recomendations.append(PasswordErrorsEnum.length)
     if __is_case_sensitive(password):
         strength += 2
     else:
         recomendations.append(PasswordErrorsEnum.mixed_case)
     if __has_special_chars(password):
-        strength += 5
+        strength += 4
     else:
         recomendations.append(PasswordErrorsEnum.special_chars)
     return strength, recomendations
